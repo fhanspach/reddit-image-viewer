@@ -1,0 +1,10 @@
+.project
+.pydevproject
+.settings
+db.sqlite3
+venv
+.DS_Store
+.idea
+.coverage
+*.pyc
+junit.xml
