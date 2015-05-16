@@ -1,2 +1,2 @@
 web: gunicorn project.wsgi
-celery: python manage.py celeryd -c 3 --beat
+#celery: python manage.py celeryd -c 3 --beat
