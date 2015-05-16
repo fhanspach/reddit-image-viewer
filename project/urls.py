@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from image_viewer import urls as image_viewer_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^', include(image_viewer_urls)),
 ]
