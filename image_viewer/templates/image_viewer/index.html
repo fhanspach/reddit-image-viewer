@@ -4,11 +4,19 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
+    <link rel="icon" type="image/x-icon" href="http://uploads.felix-hanspach.de/reddit_blue.ico?get">
     <link href='http://fonts.googleapis.com/css?family=Raleway:100,400,200' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600|Indie+Flower' rel='stylesheet'
+      type='text/css'>
     <link rel="stylesheet" href="{% static 'image_viewer/css/style.css' %}" type="text/css"/>
 </head>
 <body>
-<div id="header">{% block header %}<h1>It worked.</h1>{% endblock %}</div>
+<div id="header">{% block header %}<input id="top-input" type="text" value="Pics">{% endblock %}
+<div id="actions">
+    <div class="button">Save</div>
+    <div class="button">Login</div>
+</div>
+</div>
 <div id="content">
     {% block content %}
         <p style="text-align: center; margin-top: 1rem; font-size: 1.3rem; color: darkgray; font-weight: 100">
