@@ -7,22 +7,98 @@
     <link rel="icon" type="image/x-icon" href="http://uploads.felix-hanspach.de/reddit_blue.ico?get">
     <link href='http://fonts.googleapis.com/css?family=Raleway:100,400,200' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600|Indie+Flower' rel='stylesheet'
-      type='text/css'>
+          type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
     <link rel="stylesheet" href="{% static 'image_viewer/css/style.css' %}" type="text/css"/>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css" href="{% static "image_viewer/css/bootstrap.metro.min.css" %}"/>
+    <script src="{% static "image_viewer/js/bootstrap.min.js" %}"></script>
+
 </head>
 <body>
-<div id="header">{% block header %}<input id="top-input" type="text" value="Pics">{% endblock %}
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">reddit-viewer</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="#">List</a></li>
+
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">/r/pics/<span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">/r/pics/</a></li>
+                        <li><a href="#">/r/askReddit/</a></li>
+                        <li><a href="#">/r/GoneMild/</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+
+            <form class="navbar-form navbar-left" role="search">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search">
+                </div>
+            </form>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Link</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<!--
+<div id="header">{% block header %}
+    <div id="left_header">
+        <div id="current_reddit_icon"></div>
+        <input id="top-input" type="text" value="Pics">
+        </div>
+        {% endblock %}
 <div id="actions">
+    <div class="button">Save</div>
     <div class="button">Save</div>
     <div class="button">Login</div>
 </div>
 </div>
 <div id="content">
+    <nav class="nav">
+	<ul>
+		<li class="current"><a href="#">Portfolio</a></li>
+		<li><a href="#">Illustration</a></li>
+		<li><a href="#">Web Design</a></li>
+		<li><a href="#">Print Media</a></li>
+		<li><a href="#">Graphic Design</a></li>
+	</ul>
+</nav>
+-->
+<div class="container">
     {% block content %}
-        <p style="text-align: center; margin-top: 1rem; font-size: 1.3rem; color: darkgray; font-weight: 100">
-            Nothing here :(
-        </p>
+        <div class=".col-md-3 .col-md-offset-3">
+            <span class="label label-primary text-center">Nothing here :(</span>
+        </div>
     {% endblock %}
+    <div class="row">
+        <div id="loading-indicator col-md-4 col-md-offset-3">
+            <div class="progress progress-striped active">
+                <div class="progress-bar progress-bar-success" style="width: 100%;"></div>
+              </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

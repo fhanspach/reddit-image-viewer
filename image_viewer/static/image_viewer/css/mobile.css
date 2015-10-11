@@ -1,0 +1,14 @@
+#header {
+    height: 80px !important;
+}
+
+#header #top-input {
+    line-height: 80px !important;
+    font-size: 2.3rem;
+}
+
+#actions {
+    line-height: 80px !important;
+
+}
+

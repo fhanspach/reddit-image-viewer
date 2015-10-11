@@ -15,7 +15,7 @@ class RedditImage(models.Model):
 
     @property
     def image_html(self):
-        return mark_safe("<img src='{}' height='50px'>".format(self.image_url))
+        return mark_safe("<img src='{}' height='50px'/>".format(self.image_url))
 
     def __unicode__(self):
         return u"{} ({})".format(self.reddit, self.image_url)
