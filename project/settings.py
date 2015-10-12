@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'image_viewer',
+    'ui',
     'imgur_api',
     'reddit_api',
 )
@@ -105,5 +105,5 @@ STATIC_ROOT = 'staticfiles'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "image_viewer/static"),
+    os.path.join(BASE_DIR, "ui/static"),
 )
