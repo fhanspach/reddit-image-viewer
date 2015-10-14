@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from django.core.exceptions import ImproperlyConfigured
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -107,3 +108,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "ui/static"),
 )
+
+# Reddit API
+REDDIT_API_USER_AGENT = os.getenv("REDDIT_API_USER_AGENT", "python-requests")
+
+ALL_REDDITS_URL = "https://www.reddit.com/subreddits/popular.json?limit={}{}"
+IMPORT_BATCH_SIZE = 100
+REDDIT_ABOUT = "http://reddit.com/{}about.json"
