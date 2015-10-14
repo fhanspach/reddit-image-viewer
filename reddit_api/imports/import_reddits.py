@@ -1,4 +1,5 @@
 import datetime
+import pytz
 import requests
 import time
 from reddit_api.models import Reddit
@@ -6,31 +7,38 @@ from django.conf import settings
 
 HEADER = {"User-Agent": settings.REDDIT_API_USER_AGENT}
 
+REDDIT_COLOR = '\033[94m'
+REDDIT_COLOR_RED = '\033[91m'
+
 
 class RedditImporter(object):
     def __init__(self):
         self.last_request = datetime.datetime.now()
         self.after = None
 
-    def _save_reddit(self, reddit):
-        new_reddit, _ = Reddit.objects.update_or_create(
-            url=reddit['url'],
+    def _save_reddit(self, reddit_dict):
+        reddit, created = Reddit.objects.update_or_create(
+            url=reddit_dict['url'],
             defaults={
-                "title": reddit['title'],
-                "display_name": reddit['display_name'],
-                "description": reddit['description'],
-                "over18": reddit['over18'],
-                "public_description": reddit['public_description'],
-                "date_created": datetime.datetime.fromtimestamp(reddit['created']),
-                "subscribers": reddit['subscribers'],
-                "banner_image": reddit['banner_img']}
+                "title": reddit_dict['title'],
+                "display_name": reddit_dict['display_name'],
+                "description": reddit_dict['description'],
+                "over18": reddit_dict['over18'],
+                "public_description": reddit_dict['public_description'],
+                "date_created": datetime.datetime.fromtimestamp(reddit_dict['created'], tz=pytz.UTC),
+                "subscribers": reddit_dict['subscribers'],
+                "banner_image": reddit_dict['banner_img']}
         )
-        new_reddit.save()
-        print(new_reddit.title)
+        reddit.save()
+        log_string = "{} {}{}\033[0m({})".format('n' if created else 'u',
+                                                 REDDIT_COLOR_RED if reddit.over18 else REDDIT_COLOR, reddit.url,
+                                                 reddit.subscribers)
+        print(log_string)
 
     def _send_request(self, url):
         # prevent that there are more requests than every 3 seconds
         if self.last_request - datetime.datetime.now() < datetime.timedelta(seconds=3):
+            print "wait 3 seconds..."
             time.sleep(3)
         response = requests.get(url, headers=HEADER)
         response_json = response.json()
@@ -50,8 +58,6 @@ class RedditImporter(object):
         self._save_reddit(response_json['data'])
 
     def import_all_reddits(self):
-        print("import started: {}".format(self.after))
-
         url = settings.ALL_REDDITS_URL.format(settings.IMPORT_BATCH_SIZE,
                                               "&after={}".format(self.after) if self.after else "")
         response_json = self._send_request(url)
