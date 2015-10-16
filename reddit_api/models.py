@@ -12,6 +12,23 @@ class Reddit(models.Model):
     url = models.CharField(max_length=1023, primary_key=True)
     subscribers = models.DecimalField(max_digits=10, decimal_places=0)
     banner_image = models.URLField()
+    image = models.ForeignKey("RedditImage", null=True, blank=True, related_name="shown_image")
 
     def get_html_link(self):
         return mark_safe("<a href={}>{}</a>".format("https://reddit.com" + self.url, self.url))
+
+    def display_image_url(self):
+        return mark_safe("<img src='{}' height=70 />".format(self.get_image_url()))
+
+    def get_image_url(self):
+        return self.image.url if self.image is not None else "http://placehold.it/400x300"
+
+
+class RedditImage(models.Model):
+    url = models.URLField()
+    reputation = models.IntegerField()
+    post = models.URLField(blank=True, null=True)
+    reddit = models.ForeignKey("Reddit", related_name="all_images", null=True)
+
+    def __unicode__(self):
+        return mark_safe(u"<img src='{}' height=30 /> ({})".format(self.url, self.reputation))

@@ -6,7 +6,7 @@ from reddit_api import models
 class RedditAdmin(admin.ModelAdmin):
     class Meta:
         model = models.Reddit
-    list_display = ['title', 'subscribers', 'over18', 'get_html_link']
+    list_display = ['title', 'subscribers', 'over18', 'display_image_url']
     search_fields = ['title']
 
 

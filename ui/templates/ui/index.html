@@ -15,10 +15,25 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css" href="{% static "ui/css/bootstrap.metro.min.css" %}"/>
     <script src="{% static "ui/js/bootstrap.min.js" %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/3.1.8/imagesloaded.pkgd.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/masonry/3.1.5/masonry.pkgd.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#reddit_search_field').typeahead({
+                name: 'reddits',
+                prefetch: '/api/reddits/',
+                limit: 10
+            });
 
 
+        });
+    </script>
 </head>
 <body>
 
@@ -40,11 +55,14 @@
                 <li><a href="/list/"><span class="fa fa-list-ul"></span></a></li>
 
                 <li class="dropdown active">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">/r/pics/<span
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-expanded="false">{{ reddit.url|default:"My Reddits " }}<span
                             class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="/">/r/pics/</a></li>
-                        <li><a href="/">/r/askReddit/</a></li>
+                        {% for reddit in popular_reddits %}
+                            <li><a href="{{ reddit.url }}">{{ reddit.url }}</a></li>
+                        {% endfor %}
+
                     </ul>
                 </li>
             </ul>
@@ -52,7 +70,7 @@
 
             <form class="navbar-form navbar-left" role="search">
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="pics">
+                    <input id="reddit_search_field" type="text" class="form-control" placeholder="pics">
                 </div>
             </form>
 
@@ -63,31 +81,6 @@
     </div>
 </nav>
 
-
-<!--
-<div id="header">{% block header %}
-    <div id="left_header">
-        <div id="current_reddit_icon"></div>
-        <input id="top-input" type="text" value="Pics">
-        </div>
-        {% endblock %}
-<div id="actions">
-    <div class="button">Save</div>
-    <div class="button">Save</div>
-    <div class="button">Login</div>
-</div>
-</div>
-<div id="content">
-    <nav class="nav">
-	<ul>
-		<li class="current"><a href="#">Portfolio</a></li>
-		<li><a href="#">Illustration</a></li>
-		<li><a href="#">Web Design</a></li>
-		<li><a href="#">Print Media</a></li>
-		<li><a href="#">Graphic Design</a></li>
-	</ul>
-</nav>
--->
 <div class="container-fluid">
     <div class="row">
         <ul class="nav nav-pills pull-right">
@@ -98,12 +91,8 @@
         </ul>
     </div>
     {% block content %}
-        <!--
-        <div class=".col-md-3 .col-md-offset-3">
-            <span class="label label-primary text-center">Nothing here :(</span>
-        </div>
-        -->
-        <div class="row">
+
+        <div class="row" style="display: none">
             <div class="col-md-8 col-md-offset-2">
                 <div class="panel panel-info ">
                     <div class="panel-heading">Nothing found</div>
@@ -113,60 +102,25 @@
                 </div>
             </div>
         </div>
+        {% if error_msg %}
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">{{ error_title }}</div>
+                        <div class="panel-body">
+                            {{ error_msg }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
 
 
-        <div class="row">
-            <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb">
-                <a class="dummy_thumbnail" href="#">
-                    <img class="img-responsive"
-                         src="http://thmbnlr.apps.its-hub.de/?url=http://imgur.com/JQuktgP.jpg&width=600&max_size=100"
-                         alt="">
-                </a>
-            </div>
-
-        <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb">
-                <a class="dummy_thumbnail" href="#">
-                    <img class="img-responsive"
-                         src="http://thmbnlr.apps.its-hub.de/?url=http://i.imgur.com/bski4J7.jpg&width=600&max_size=100"
-                         alt="">
-                </a>
-            </div>
-        <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb">
-                <a class="dummy_thumbnail" href="#">
-                    <img class="img-responsive"
-                         src="http://thmbnlr.apps.its-hub.de/?url=http://imgur.com/cW7rdfr.jpg&width=600&max_size=100"
-                         alt="">
-                </a>
-            </div>
-        <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb">
-                <a class="dummy_thumbnail" href="#">
-                    <img class="img-responsive"
-                         src="http://thmbnlr.apps.its-hub.de/?url=http://i.imgur.com/cQr1wEL.jpg&width=600&max_size=100"
-                         alt="">
-
-                    <p class="text-center">pics</p>
-                </a>
-            </div>
-        <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb">
-                <a class="dummy_thumbnail" href="#">
-                    <img class="img-responsive"
-                         src="http://thmbnlr.apps.its-hub.de/?url=http://i.imgur.com/Kp4SAvW.jpg&width=600&max_size=100"
-                         alt="">
-                </a>
-            </div>
-        <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb">
-                <a class="dummy_thumbnail" href="#">
-                    <img class="img-responsive"
-                         src="http://thmbnlr.apps.its-hub.de/?url=http://i.imgur.com/hNILVxc.jpg&width=600&max_size=100"
-                         alt="">
-                </a>
-            </div>
-
-        </div>
+        <div class="row" id="submission_content"></div>
     {% endblock %}
     <div class="row" id="loading-indicator" style="display: none;">
         <div class="col-md-8 col-md-offset-2">
-            <h3>Loading more...</h3>
+            <h3>Loading submissions...</h3>
 
             <div class="progress progress-striped active">
                 <div class="progress-bar progress-bar-success" style="width: 100%;"></div>
@@ -174,5 +128,54 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var container = document.querySelector('#submission_content');
+
+        var $loading_indicator = $("#loading-indicator");
+        var msnry = new Masonry(container, {
+            // options
+            itemSelector: '.submission'
+        });
+
+        if ($('#submission_content').is(':empty')) {
+            // first load
+            $loading_indicator.fadeIn();
+            $.get("/reddit/{{ reddit.display_name }}", function (data) {
+                var $submissionContent = $('#submission_content');
+                $submissionContent.append(data.html);
+                msnry.layout();
+                $submissionContent.imagesLoaded(function () {
+                }).always(onDoneLoad);
+            })
+        }
+
+        var $search_field = $("#reddit_search_field");
+        $search_field.on('keypress', function (e) {
+            if (e.which == 13) {
+                var url_fragment = $search_field.val();
+                var url = "";
+                if ((/^\/r\//).test(url_fragment)) {
+                    url = url_fragment
+                } else {
+                    url = "/r/" + url_fragment + "/";
+                }
+
+                window.location.href = url;
+            }
+        });
+
+        function onDoneLoad() {
+            var container = document.querySelector('#submission_content');
+            //$container.show();
+            var msnry = new Masonry(container, {
+                // options
+                itemSelector: '.submission'
+            });
+            $loading_indicator.fadeOut(600);
+        };
+    })
+</script>
 </body>
 </html>

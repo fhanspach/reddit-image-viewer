@@ -1,0 +1,5 @@
+{% for submission in submissions %}
+    <div class="col-lg-4 col-md-5 col-xs-6 dummy_thumb submission">
+        {% include "reddit_api/submissions/image_submission.html" %}
+    </div>
+{% endfor %}
