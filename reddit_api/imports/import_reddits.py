@@ -8,12 +8,12 @@ from django.conf import settings
 HEADER = {"User-Agent": settings.REDDIT_API_USER_AGENT}
 
 REDDIT_COLOR = '\033[94m'
-REDDIT_COLOR_RED = '\033[91m'
+REDDIT_COLOR_RED = '\033[1;35m'
 
 
 class RedditImporter(object):
     def __init__(self):
-        self.last_request = datetime.datetime.now()
+        self.last_request = None
         self.after = None
 
     def _save_reddit(self, reddit_dict):
@@ -34,17 +34,22 @@ class RedditImporter(object):
                                                  REDDIT_COLOR_RED if reddit.over18 else REDDIT_COLOR, reddit.url,
                                                  reddit.subscribers)
         print(log_string)
+        return reddit
+
+    def _wait_if_required(self):
+        # prevent that there are more requests than every 3 seconds
+        if self.last_request is not None \
+                and self.last_request - datetime.datetime.now() < datetime.timedelta(seconds=3):
+            time.sleep(3)
 
     def _send_request(self, url):
-        # prevent that there are more requests than every 3 seconds
-        if self.last_request - datetime.datetime.now() < datetime.timedelta(seconds=3):
-            print "wait 3 seconds..."
-            time.sleep(3)
+        self._wait_if_required()
         response = requests.get(url, headers=HEADER)
         response_json = response.json()
         if response.status_code == 429:
             time.sleep(30)
             return self._send_request(url)
+        response.raise_for_status()
 
         self.last_request = datetime.datetime.now()
         return response_json
@@ -55,7 +60,7 @@ class RedditImporter(object):
 
         url = settings.REDDIT_ABOUT.format(url)
         response_json = self._send_request(url)
-        self._save_reddit(response_json['data'])
+        return self._save_reddit(response_json['data'])
 
     def import_all_reddits(self):
         url = settings.ALL_REDDITS_URL.format(settings.IMPORT_BATCH_SIZE,
