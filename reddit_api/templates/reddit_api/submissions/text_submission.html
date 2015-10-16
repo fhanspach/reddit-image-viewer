@@ -1,2 +1,36 @@
-<h2></h2>
-<p></p>
+<div class="well well-sm" style="overflow: hidden">
+    <h3>{% if submission.stickied %}<span class="fa fa-thumb-tack small"></span>&nbsp;{% endif %}{{ submission.title }}</h3>
+    {% if submission.selftext %}<p>{{ submission.selftext_html|safe }}</p>{% endif %}
+    <a href="{{ submission.permalink }}">View on Reddit</a>
+    <div class="pull-right">
+        <span data-toggle="tooltip" data-placement="right" title="" data-original-title="Comments"
+              class="{% if submission.num_comments > 0 %}text-success{% else %}text-muted{% endif %} submission_badge">
+            <i class="fa fa-comments"></i>&nbsp;{{ submission.num_comments }}&nbsp;
+        </span>
+        {% spaceless %}
+        <span data-toggle="tooltip" data-placement="right" title="" data-original-title="Score"
+              class="submission_badge
+              {% if submission.score > 0 %}text-success{% endif %}
+              {% if submission.score == 0 %}text-muted{% endif %}
+              {% if submission.score < 0 %}text-warning{% endif %}">
+            <i class="fa fa-arrow-up {% if submission.score > 0 %}fa-flip-horizontal{% endif %}
+              {% if submission.score == 0 %}text-muted{% endif %}
+              {% if submission.score < 0 %}text-warning{% endif %}"></i>&nbsp;{{ submission.score }}&nbsp;
+        </span>
+
+    {% if submission.over_18 and not reddit.over18 %}
+        &nbsp;<span data-toggle="tooltip" data-placement="right" title="" data-original-title="Over 18"
+              class="{% if submission.num_comments > 0 %}text-success{% else %}text-muted{% endif %} submission_badge">
+            <span class="label label-danger">NSFW</span>
+        </span>
+    {% endif %}
+    {% endspaceless %}
+    </div>
+    <div class="clearfix"></div>
+
+<script type="text/javascript">
+    $('.submission_badge').tooltip({
+        placement: "bottom"
+    });
+</script>
+</div>

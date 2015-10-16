@@ -1,9 +1,10 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
+    <title>{{ reddit.display_name|default_if_none:"List" }}| Reddit Image Viewer</title>
     <link rel="icon" type="image/x-icon" href="http://uploads.felix-hanspach.de/reddit_blue.ico?get">
     <link href='http://fonts.googleapis.com/css?family=Raleway:100,400,200' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600|Indie+Flower' rel='stylesheet'
@@ -36,60 +37,64 @@
     </script>
 </head>
 <body>
-
 <nav class="navbar navbar-default">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#"><span class="fa fa-reddit"></span>&nbsp;reddit-viewer</a>
-        </div>
-
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li><a href="/list/"><span class="fa fa-list-ul"></span></a></li>
-
-                <li class="dropdown active">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-expanded="false">{{ reddit.url|default:"My Reddits " }}<span
-                            class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        {% for reddit in popular_reddits %}
-                            <li><a href="{{ reddit.url }}">{{ reddit.url }}</a></li>
-                        {% endfor %}
-
-                    </ul>
-                </li>
-            </ul>
-
-
-            <form class="navbar-form navbar-left" role="search">
-                <div class="form-group">
-                    <input id="reddit_search_field" type="text" class="form-control" placeholder="pics">
-                </div>
-            </form>
-
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="#"><span class="fa fa-sign-in"></span>&nbsp;Login</a></li>
-            </ul>
-        </div>
+        {% include "ui/navigation.html" %}
     </div>
 </nav>
+{% if reddit %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-xs-12" style="padding-left: 0">
+                <div class="pull-left">
+                    <h2 style="margin-top: 0;">{{ reddit.title }}</h2>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="pull-right">
+                    <ul class="nav nav-pills ">
+                        <li role="presentation"
+                            class="{% if request.GET.display == 'hot' or not request.GET.display %}active{% endif %}"><a
+                                href="?display=hot">Hot</a></li>
+                        <li role="presentation" class="{% if request.GET.display == "new" %}active{% endif %}"><a
+                                href="?display=new">New</a></li>
+                        <li class="dropdown {% if request.GET.display == "top" %}active{% endif %}">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                                Top{% if request.GET.display == "top" %} of {{ request.GET.period }}{% endif %} <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="?display=top&period=day">Day</a></li>
+                                <li><a href="?display=top&period=month">Month</a></li>
+                                <li><a href="?display=top&period=week">Week</a></li>
+                                <li><a href="?display=top&period=year">Year</a></li>
+                                <li><a href="?display=top&period=all">All</a></li>
+                            </ul>
+                        </li>
 
-<div class="container-fluid">
-    <div class="row">
-        <ul class="nav nav-pills pull-right">
-            <li role="presentation" class="active"><a href="#">Hot</a></li>
-            <li role="presentation"><a href="#">New</a></li>
+                    </ul>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="clearfix"></div>
+            {% if reddit.over18 %}
+                <p>
+                    <span data-toggle="tooltip"
+                          data-placement="right" title="" data-original-title="Over 18" class="submission_badge">
+                        <span class="label label-danger">NSFW</span>
+                    </span>
+                </p>
+            {% endif %}
 
-            <li role="presentation"><a href="#">Top</a></li>
-        </ul>
+            <p class="text-primary">
+                <span><span class="fa fa-users"></span>&nbsp;{{ reddit.subscribers|intcomma }}</span>&nbsp;
+                <span><span class="fa fa-calendar-times-o"></span>&nbsp;{{ reddit.date_created|timesince }}</span>&nbsp;
+            </p>
+            <hr/>
+        </div>
     </div>
+{% endif %}
+<div class="container-fluid">
     {% block content %}
 
         <div class="row" style="display: none">
@@ -139,10 +144,17 @@
             itemSelector: '.submission'
         });
 
+        function get_current_parameters() {
+            // FIXME replace this method with a state that works without reloading the page
+            return "display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"
+        }
+
         if ($('#submission_content').is(':empty')) {
             // first load
             $loading_indicator.fadeIn();
-            $.get("/reddit/{{ reddit.display_name }}", function (data) {
+            var url = "/reddit/{{ reddit.display_name }}?";
+            url = url + get_current_parameters();
+            $.get(url, function (data) {
                 var $submissionContent = $('#submission_content');
                 $submissionContent.append(data.html);
                 msnry.layout();
