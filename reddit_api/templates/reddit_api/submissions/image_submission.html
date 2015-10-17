@@ -1,7 +1,7 @@
 <a class="dummy_thumbnail image-thumb-loaded " href="{{ submission.permalink }}"
-   id="submission-link{{ submission.id }}">
+   id="submission-link{{ submission.id }}">{% spaceless %}
     <img class="img-responsive image-thumb" id="image-thumb-{{ submission.id }}"
-         src="{{ submission.thumbnail }}"
+         src="{% if submission.thumbnail != "nsfw" %}{{ submission.thumbnail }}{% else %}http://thmbnlr.apps.its-hub.de/?url={{ submission.media.oembed.thumbnail_url|default:"http://placehold.it/350x150?text=No Preview :(" }}&width=100&max_size=100{% endif %}"
          alt="" style="width: 100%"/>
     <img class="img-responsive image-full" id="image-full-{{ submission.id }}"
          src="http://thmbnlr.apps.its-hub.de/?url={{ submission.url }}&width=600&max_size=100" alt=""
@@ -9,7 +9,7 @@
 
     <div class="image-loading-indicator"><span class="fa fa-refresh fa-spin"></span></div>
     <div class="image-error-indicator text-danger"><span class="fa fa-exclamation-triangle"></span></div>
-
+{% endspaceless %}
 </a>
 <p>{{ submission.title }}
     <small><a href="#">{{ submission.author }}</a></small>
