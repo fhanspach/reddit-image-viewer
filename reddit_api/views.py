@@ -1,5 +1,7 @@
-from django.http import JsonResponse
+import re
+from django.http import JsonResponse, Http404
 from django.conf import settings
+from django.shortcuts import redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 import praw
@@ -31,10 +33,27 @@ def _send_request(reddit_name, display='hot', period=None):
         raise ValueError("Display Parameter must be one of 'hot', 'top' or 'new'")
 
     try:
-        api_submissions = request_submissions(limit=100, params={})
+        api_submissions = request_submissions(limit=20, params={})
     except ConnectionError:
         api_submissions = []
     return api_submissions
+
+
+def check_submission_type(submission):
+    submission.is_image = False
+
+    # self posts are never image submissions
+    if submission.is_self:
+        return submission
+
+    url = submission.url
+    url_part = url.lower().split("?")[0]
+    if url_part.endswith(('.png', '.jpg', '.jpeg')):
+        submission.is_image = True
+
+    if "imgur" in url_part:
+        submission.is_image = True
+    return submission
 
 
 def get_submissions(request, reddit_name):
@@ -51,7 +70,7 @@ def get_submissions(request, reddit_name):
 
     entry_list = []
     for submission in api_submissions:
-        entry_list.append(submission)
+        entry_list.append(check_submission_type(submission))
         if reddit_image.reputation < submission.ups:
             reddit_image.url = submission.thumbnail
             reddit_image.post = submission.permalink
@@ -65,3 +84,9 @@ def get_submissions(request, reddit_name):
     html = render_to_string('reddit_api/submissions.html', RequestContext(request, context))
     reddit_image.save()
     return JsonResponse({"html": html})
+
+
+def get_image(request):
+    if "url" not in request.GET:
+        raise Http404
+    return redirect(to="http://thmbnlr.apps.its-hub.de/?url={}&width=600&max_size=100".format(request.GET.get("url")))

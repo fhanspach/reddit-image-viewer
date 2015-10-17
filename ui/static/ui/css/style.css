@@ -1,7 +1,59 @@
-.submission>.well>h3 {
+.submission > .well > h3 {
     margin-top: 0.5rem;
 }
 
 .submission_badge {
     cursor: default;
+}
+
+.loading-error-icon {
+    display: none;
+}
+
+.loading-indicator.error-state > div > h3 {
+    color: darkred;
+}
+
+.loading-indicator.error-state > div > .loading-error-icon {
+    display: inline;
+}
+
+/* image submission style states */
+.image-thumb-loaded > .image-thumb {
+    display: inherit;
+}
+
+.image-thumb-loaded > .image-full, .image-full-loaded-error > .image-full {
+    display: none;
+}
+
+.image-full-loaded > .image-thumb {
+    display: none;
+}
+
+.image-full-loaded > .image-full {
+    display: inherit;
+}
+
+.image-full-loaded > .image-loading-indicator, .image-full-loaded-error > .image-loading-indicator {
+    display: none;
+}
+
+.image-loading-indicator {
+    display: block;
+    margin-top: -5.5rem;
+    padding: 10px;
+    color: #f5f5f5;
+    font-size: 3rem;
+}
+
+.image-error-indicator {
+    display: none;
+}
+
+.image-full-loaded-error > .image-error-indicator {
+    display: block;
+    margin-top: -5.5rem;
+    padding: 10px;
+    font-size: 3rem;
 }

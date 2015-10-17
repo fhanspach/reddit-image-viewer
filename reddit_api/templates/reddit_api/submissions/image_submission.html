@@ -1,6 +1,36 @@
-<a class="dummy_thumbnail" href="{{ submission.permalink }}">
-    <img class="img-responsive"
-         src="http://thmbnlr.apps.its-hub.de/?url={{ submission.thumbnail }}&width=600&max_size=100"
-         alt="" style="width: 100%">
+<a class="dummy_thumbnail image-thumb-loaded " href="{{ submission.permalink }}"
+   id="submission-link{{ submission.id }}">
+    <img class="img-responsive image-thumb" id="image-thumb-{{ submission.id }}"
+         src="{{ submission.thumbnail }}"
+         alt="" style="width: 100%"/>
+    <img class="img-responsive image-full" id="image-full-{{ submission.id }}"
+         src="http://thmbnlr.apps.its-hub.de/?url={{ submission.url }}&width=600&max_size=100" alt=""
+         style="width: 100%"/>
+
+    <div class="image-loading-indicator"><span class="fa fa-refresh fa-spin"></span></div>
+    <div class="image-error-indicator text-danger"><span class="fa fa-exclamation-triangle"></span></div>
+
 </a>
-<p>{{ submission.title }} <small><a href="#">{{ submission.author }}</a></small></p>
+<p>{{ submission.title }}
+    <small><a href="#">{{ submission.author }}</a></small>
+</p>
+
+<script type="text/javascript">
+    var image_full_selector = "#image-full-{{ submission.id }}";
+    var url = "/reddit/image/?url={{ submission.url }}";
+    $(image_full_selector).load(function () {
+        console.log(image_full_selector + " loaded");
+        var $submission_link_selector = "#submission-link{{ submission.id }}";
+        var $submission_link = $($submission_link_selector);
+        $submission_link.removeClass("image-thumb-loaded");
+        $submission_link.addClass("image-full-loaded");
+    });
+    $(image_full_selector).error(function (error_data) {
+        console.log(image_full_selector + " broken");
+        var $submission_link_selector = "#submission-link{{ submission.id }}";
+        var $submission_link = $($submission_link_selector);
+        $submission_link.removeClass("image-thumb-loaded");
+        $submission_link.addClass("image-full-loaded-error");
+        console.error(error_data);
+    });
+</script>

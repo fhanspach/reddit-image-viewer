@@ -61,7 +61,8 @@
                                 href="?display=new">New</a></li>
                         <li class="dropdown {% if request.GET.display == "top" %}active{% endif %}">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
-                                Top{% if request.GET.display == "top" %} of {{ request.GET.period }}{% endif %} <span class="caret"></span>
+                                Top{% if request.GET.display == "top" %} of {{ request.GET.period }}{% endif %} <span
+                                    class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a href="?display=top&period=day">Day</a></li>
@@ -107,18 +108,17 @@
                 </div>
             </div>
         </div>
-        {% if error_msg %}
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">{{ error_title }}</div>
-                        <div class="panel-body">
-                            {{ error_msg }}
-                        </div>
+
+        <div class="row error-row" style="{% if not error_msg %}display: none{% endif %}">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-danger">
+                    <div class="panel-heading" id="error-heading">{{ error_title }}</div>
+                    <div class="panel-body" id="error-body">
+                        {{ error_msg }}
                     </div>
                 </div>
             </div>
-        {% endif %}
+        </div>
 
 
         <div class="row" id="submission_content"></div>
@@ -136,6 +136,14 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+        var error_handler = function (data) {
+            $loading_indicator.hide();
+            $("#error-heading").html("<i class='fa fa-exclamation-triangle'></i> HTTP Status Code " + data.status + ": " + data.statusText);
+            $("#error-body").html("The request to the server failed. <br/> <a href='#exception-text' data-toggle='collapse'>more...</a><div id='exception-text' class='collapse'><pre class='pre-scrollable'>" + data.responseText + "</pre></div>");
+            $(".error-row").show();
+            console.error(data.responseText)
+        };
+
         var container = document.querySelector('#submission_content');
 
         var $loading_indicator = $("#loading-indicator");
@@ -154,19 +162,22 @@
             $loading_indicator.fadeIn();
             var url = "/reddit/{{ reddit.display_name }}?";
             url = url + get_current_parameters();
-            $.get(url, function (data) {
-                var $submissionContent = $('#submission_content');
-                $submissionContent.append(data.html);
-                msnry.layout();
-                $submissionContent.imagesLoaded(function () {
-                }).always(onDoneLoad);
-            })
+            $.ajax(url, {
+                success: function (data) {
+                    var $submissionContent = $('#submission_content');
+                    $submissionContent.append(data.html);
+                    msnry.layout();
+                    $submissionContent.imagesLoaded(function () {
+                    }).progress(onDoneLoad).always(onDoneLoad);
+                },
+                error: error_handler
+            });
         }
 
         var $search_field = $("#reddit_search_field");
         $search_field.on('keypress', function (e) {
             if (e.which == 13) {
-                var url_fragment = $search_field.val();
+                var url_fragment = $search_field.val().replace(/\s+/g, '');;
                 var url = "";
                 if ((/^\/r\//).test(url_fragment)) {
                     url = url_fragment

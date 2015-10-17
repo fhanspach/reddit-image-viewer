@@ -3,7 +3,10 @@
     {% if submission.selftext %}<p>{{ submission.selftext_html|safe }}</p>{% endif %}
     <a href="{{ submission.permalink }}">View on Reddit</a>
     <div class="pull-right">
-        <span data-toggle="tooltip" data-placement="right" title="" data-original-title="Comments"
+        <span data-toggle="tooltip" data-placement="right" title="" data-original-title="Author"
+              class="text-success submission_badge">
+            <i class="fa fa-user"></i>&nbsp;{{ submission.author }}&nbsp;
+        </span><span data-toggle="tooltip" data-placement="right" title="" data-original-title="Comments"
               class="{% if submission.num_comments > 0 %}text-success{% else %}text-muted{% endif %} submission_badge">
             <i class="fa fa-comments"></i>&nbsp;{{ submission.num_comments }}&nbsp;
         </span>
@@ -17,7 +20,6 @@
               {% if submission.score == 0 %}text-muted{% endif %}
               {% if submission.score < 0 %}text-warning{% endif %}"></i>&nbsp;{{ submission.score }}&nbsp;
         </span>
-
     {% if submission.over_18 and not reddit.over18 %}
         &nbsp;<span data-toggle="tooltip" data-placement="right" title="" data-original-title="Over 18"
               class="{% if submission.num_comments > 0 %}text-success{% else %}text-muted{% endif %} submission_badge">
