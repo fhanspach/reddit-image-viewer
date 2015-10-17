@@ -1,0 +1,8 @@
+<table>
+    {% for reddit in reddits %}
+        <tr>
+            <td><a href="{{ reddit.url }}">{{ reddit.display_name }}</a></td>
+            <td>{{ reddit.public_description_html|safe }}</td>
+        </tr>
+    {% endfor %}
+</table>

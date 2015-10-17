@@ -1,12 +1,13 @@
 import re
 from django.http import JsonResponse, Http404
 from django.conf import settings
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.template.loader import render_to_string
 import praw
 from reddit_api.models import Reddit, RedditImage
 from requests import ConnectionError
+from reddit_api.imports import import_reddits
 
 r = praw.Reddit(user_agent=settings.REDDIT_API_USER_AGENT)
 
@@ -90,3 +91,12 @@ def get_image(request):
     if "url" not in request.GET:
         raise Http404
     return redirect(to="http://thmbnlr.apps.its-hub.de/?url={}&width=600&max_size=100".format(request.GET.get("url")))
+
+
+def get_recommended(request, reddit_name):
+    result = list(r.get_subreddit_recommendations(reddit_name))
+    for reddit in result:
+        import_reddits.RedditImporter().import_single_reddit(reddit.url)
+    return render(request, 'reddit_api/recommended.html', context={
+        "reddits": result
+    })
