@@ -12,7 +12,8 @@ from reddit_api.imports import import_reddits
 r = praw.Reddit(user_agent=settings.REDDIT_API_USER_AGENT)
 
 
-def _send_request(reddit_name, display='hot', period=None):
+def _send_request(reddit_name, display='hot', period=None, last=None):
+    print last
     if display == 'new':
         request_submissions = r.get_subreddit(reddit_name).get_new
     elif display == 'hot' or display == "":
@@ -34,7 +35,7 @@ def _send_request(reddit_name, display='hot', period=None):
         raise ValueError("Display Parameter must be one of 'hot', 'top' or 'new'")
 
     try:
-        api_submissions = request_submissions(limit=20, params={})
+        api_submissions = request_submissions(limit=30, params={"after": last})
     except ConnectionError:
         api_submissions = []
     return api_submissions
@@ -67,24 +68,33 @@ def get_submissions(request, reddit_name):
         reddit.save()
 
     api_submissions = _send_request(reddit_name, display=request.GET.get('display', 'hot'),
-                                    period=request.GET.get('period', None))
+                                    period=request.GET.get('period', None), last=request.GET.get('last', None))
 
     entry_list = []
+    last_post = None
     for submission in api_submissions:
         entry_list.append(check_submission_type(submission))
+        last_post = submission
         if reddit_image.reputation < submission.ups:
             reddit_image.url = submission.thumbnail
             reddit_image.post = submission.permalink
             reddit_image.reddit = reddit
             reddit_image.reputation = submission.ups
 
+    last_post_id = "t3_{}".format(last_post.id) if last_post else None
     context = {
         'submissions': entry_list,
-        'reddit': reddit
+        'reddit': reddit,
+        'last_post': last_post_id
     }
+
     html = render_to_string('reddit_api/submissions.html', RequestContext(request, context))
     reddit_image.save()
-    return JsonResponse({"html": html})
+    context = {
+        "html": html,
+        "last_post": last_post_id
+    }
+    return JsonResponse(context)
 
 
 def get_image(request):

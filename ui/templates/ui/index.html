@@ -121,6 +121,12 @@
 
         <div class="row" id="submission_content"></div>
     {% endblock %}
+    <div class="row hidden">
+        <div class="col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-12 col-xs-12">
+            <a href="#" class="btn btn-primary btn-lg center-block" id="load_next_button">Load next...</a>
+        </div>
+    </div>
+
     <div class="row" id="loading-indicator" style="display: none;">
         <div class="col-md-8 col-md-offset-2">
             <h3>Loading submissions...</h3>
@@ -130,11 +136,16 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <script type="text/javascript">
+    var last_post_id = null;
+    var is_loading = false;
+    var loading_images = 0;
     $(document).ready(function () {
         var error_handler = function (data) {
+            is_loading = false;
             $loading_indicator.hide();
             $("#error-heading").html("<i class='fa fa-exclamation-triangle'></i> HTTP Status Code " + data.status + ": " + data.statusText);
             $("#error-body").html("The request to the server failed. <br/> <a href='#exception-text' data-toggle='collapse'>more...</a><div id='exception-text' class='collapse'><pre class='pre-scrollable'>" + data.responseText + "</pre></div>");
@@ -152,19 +163,29 @@
 
         function get_current_parameters() {
             // FIXME replace this method with a state that works without reloading the page
-            return "display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"
+            var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"{% endspaceless %}
+            if (last_post_id != null) {
+                parameter_string += "&last=" + last_post_id;
+            }
+            return parameter_string
         }
 
-        if ($('#submission_content').is(':empty')) {
-            // first load
+        function load_submissions_from_api() {
             $loading_indicator.fadeIn();
             var url = "/reddit/{{ reddit.display_name }}?";
             url = url + get_current_parameters();
+            if (loading_images > 100) {
+                console.warn("Too many requests... Waiting now");
+                while (loading_images > 100) {console.log(loading_images)};
+            }
+            is_loading = true;
             $.ajax(url, {
                 success: function (data) {
                     var $submissionContent = $('#submission_content');
+                    last_post_id = data.last_post;
                     $submissionContent.append(data.html);
                     msnry.layout();
+                    is_loading = false;
                     $submissionContent.imagesLoaded(function () {
                     }).progress(onDoneLoad).always(onDoneLoad);
                 },
@@ -172,10 +193,23 @@
             });
         }
 
+        function do_first_load() {
+            load_submissions_from_api();
+        }
+
+        if ($('#submission_content').is(':empty')) {
+            do_first_load();
+        }
+
+        $("#load_next_button").on('click', function (e) {
+            e.preventDefault();
+            load_submissions_from_api();
+        });
+
         var $search_field = $("#reddit_search_field");
         $search_field.on('keypress', function (e) {
             if (e.which == 13) {
-                var url_fragment = $search_field.val().replace(/\s+/g, '');;
+                var url_fragment = $search_field.val().replace(/\s+/g, '');
                 var url = "";
                 if ((/^\/r\//).test(url_fragment)) {
                     url = url_fragment
@@ -195,7 +229,21 @@
                 itemSelector: '.submission'
             });
             $loading_indicator.fadeOut(600);
-        };
+        }
+
+        $(window).scroll(function (data) {
+            if (is_loading) {
+                return;
+            }
+
+            var scroll_height = $(window).scrollTop() + $(window).height();
+            var doc_height = $(document).height();
+            var left = doc_height - scroll_height;
+            var loading_scroll_time = $(window).height() *3;
+            if (left < loading_scroll_time) {
+                load_submissions_from_api();
+            }
+        });
     })
 </script>
 </body>
