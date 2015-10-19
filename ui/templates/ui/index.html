@@ -143,6 +143,8 @@
     var last_post_id = null;
     var is_loading = false;
     var loading_images = 0;
+    var submissions_queue = [];
+
     $(document).ready(function () {
         var error_handler = function (data) {
             is_loading = false;
@@ -163,7 +165,8 @@
 
         function get_current_parameters() {
             // FIXME replace this method with a state that works without reloading the page
-            var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"{% endspaceless %}
+            var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period=
+                {{ request.GET.period }}{% endif %}"{% endspaceless %}
             if (last_post_id != null) {
                 parameter_string += "&last=" + last_post_id;
             }
@@ -176,7 +179,10 @@
             url = url + get_current_parameters();
             if (loading_images > 100) {
                 console.warn("Too many requests... Waiting now");
-                while (loading_images > 100) {console.log(loading_images)};
+                while (loading_images > 100) {
+                    console.log(loading_images)
+                }
+                ;
             }
             is_loading = true;
             $.ajax(url, {
@@ -186,6 +192,10 @@
                     $submissionContent.append(data.html);
                     msnry.layout();
                     is_loading = false;
+                    submissions_queue.push(last_post_id);
+                    if (submissions_queue.length > 4) {
+                        window.location.hash = submissions_queue.shift();
+                    }
                     $submissionContent.imagesLoaded(function () {
                     }).progress(onDoneLoad).always(onDoneLoad);
                 },
@@ -194,6 +204,11 @@
         }
 
         function do_first_load() {
+            if (window.location.hash != "") {
+                last_post_id = window.location.hash.substring(1);
+                console.log("continue from " + last_post_id);
+            }
+
             load_submissions_from_api();
         }
 
@@ -239,7 +254,7 @@
             var scroll_height = $(window).scrollTop() + $(window).height();
             var doc_height = $(document).height();
             var left = doc_height - scroll_height;
-            var loading_scroll_time = $(window).height() *3;
+            var loading_scroll_time = $(window).height() * 3;
             if (left < loading_scroll_time) {
                 load_submissions_from_api();
             }

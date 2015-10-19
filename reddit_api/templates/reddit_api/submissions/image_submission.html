@@ -19,11 +19,12 @@
     var image_full_selector = "#image-full-{{ submission.id }}";
     var url = "/reddit/image/?url={{ submission.url }}";
     $(image_full_selector).load(function () {
-        console.log(image_full_selector + " loaded");
         var $submission_link_selector = "#submission-link{{ submission.id }}";
         var $submission_link = $($submission_link_selector);
         $submission_link.removeClass("image-thumb-loaded");
         $submission_link.addClass("image-full-loaded");
+        var thumb_selector = "image-thumb-{{ submission.id }}";
+        $(thumb_selector).remove();
     });
     $(image_full_selector).error(function (error_data) {
         console.log(image_full_selector + " broken");
@@ -31,6 +32,8 @@
         var $submission_link = $($submission_link_selector);
         $submission_link.removeClass("image-thumb-loaded");
         $submission_link.addClass("image-full-loaded-error");
-        console.error(error_data);
+        // console.error(error_data);
+        var full_img_selector = "image-full-{{ submission.id }}";
+        $(full_img_selector).remove();
     });
 </script>

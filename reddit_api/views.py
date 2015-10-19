@@ -67,8 +67,9 @@ def get_submissions(request, reddit_name):
         reddit.image = reddit_image
         reddit.save()
 
+    batch_id = request.GET.get('last', None)
     api_submissions = _send_request(reddit_name, display=request.GET.get('display', 'hot'),
-                                    period=request.GET.get('period', None), last=request.GET.get('last', None))
+                                    period=request.GET.get('period', None), last=batch_id)
 
     entry_list = []
     last_post = None
@@ -82,17 +83,20 @@ def get_submissions(request, reddit_name):
             reddit_image.reputation = submission.ups
 
     last_post_id = "t3_{}".format(last_post.id) if last_post else None
+    batch_id = batch_id or "t3_{}".format(entry_list[0].id)
     context = {
         'submissions': entry_list,
         'reddit': reddit,
-        'last_post': last_post_id
+        'last_post': last_post_id,
+        "batch_id": batch_id,
     }
 
     html = render_to_string('reddit_api/submissions.html', RequestContext(request, context))
     reddit_image.save()
     context = {
         "html": html,
-        "last_post": last_post_id
+        "last_post": last_post_id,
+        "batch_id": batch_id,
     }
     return JsonResponse(context)
 
