@@ -94,6 +94,11 @@
     </div>
 {% endif %}
 <div class="container-fluid">
+    <div class="row" id="load_prev" style="display: none; padding: 1rem;">
+        <div class="col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-12 col-xs-12">
+            <a href="#" class="btn btn-primary btn-lg center-block" id="load_next_button"><span class="fa fa-arrow-up">&nbsp;</span>Load previous...</a>
+        </div>
+    </div>
     {% block content %}
 
         <div class="row" style="display: none">
@@ -165,8 +170,7 @@
 
         function get_current_parameters() {
             // FIXME replace this method with a state that works without reloading the page
-            var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period=
-                {{ request.GET.period }}{% endif %}"{% endspaceless %}
+            var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"{% endspaceless %}
             if (last_post_id != null) {
                 parameter_string += "&last=" + last_post_id;
             }
@@ -188,6 +192,8 @@
                 success: function (data) {
                     var $submissionContent = $('#submission_content');
                     last_post_id = data.last_post;
+                    var batch_id = data.batch_id;
+                    console.log("batch: " + batch_id)
                     $submissionContent.append(data.html);
                     msnry.layout();
                     is_loading = false;
@@ -195,8 +201,12 @@
                     if (submissions_queue.length > 4) {
                         window.location.hash = submissions_queue.shift();
                     }
-                    $submissionContent.imagesLoaded(function () {
-                    }).progress(onDoneLoad).always(onDoneLoad);
+
+
+                    var submission_thumbs = $(".image-thumb");
+                    console.log("loading: " + last_post_id);
+                    submission_thumbs.imagesLoaded(function () {
+                    }).always(function(){onAlwaysListener(batch_id)});
                 },
                 error: error_handler
             });
@@ -204,6 +214,7 @@
 
         function do_first_load() {
             if (window.location.hash != "") {
+                $("#load_prev").show();
                 last_post_id = window.location.hash.substring(1);
                 console.log("continue from " + last_post_id);
             }
@@ -235,6 +246,14 @@
             }
         });
 
+        function onAlwaysListener(batch_id) {
+            console.log("batch: " + batch_id);
+            var selector = "#submission-batch-" + batch_id;
+            console.log(selector);
+            $(selector).show();
+            onDoneLoad();
+            $loading_indicator.fadeOut(600);
+        }
         function onDoneLoad() {
             var container = document.querySelector('#submission_content');
             //$container.show();
@@ -242,7 +261,7 @@
                 // options
                 itemSelector: '.submission'
             });
-            $loading_indicator.fadeOut(600);
+
         }
 
         $(window).scroll(function (data) {

@@ -13,7 +13,6 @@ r = praw.Reddit(user_agent=settings.REDDIT_API_USER_AGENT)
 
 
 def _send_request(reddit_name, display='hot', period=None, last=None):
-    print last
     if display == 'new':
         request_submissions = r.get_subreddit(reddit_name).get_new
     elif display == 'hot' or display == "":
