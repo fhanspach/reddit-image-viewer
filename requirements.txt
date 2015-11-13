@@ -20,3 +20,4 @@ wsgiref==0.1.2
 -e git+https://github.com/fhanspach/dj-secret-key-util#egg=secret_key_util
 arrow==0.5.4
 django-flat-theme
+django-toolbelt
