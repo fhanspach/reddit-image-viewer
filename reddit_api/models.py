@@ -21,7 +21,7 @@ class Reddit(models.Model):
         return mark_safe("<img src='{}' height=70 />".format(self.get_image_url()))
 
     def get_image_url(self):
-        return self.image.url if self.image is not None else "http://placehold.it/400x300"
+        return self.image.url if self.image is not None and self.image.url is not "self" and self.image.url is not "" else "http://placehold.it/400x300"
 
 
 class RedditImage(models.Model):

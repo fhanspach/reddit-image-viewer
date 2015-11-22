@@ -8,7 +8,8 @@ import praw
 from reddit_api.models import Reddit, RedditImage
 from requests import ConnectionError
 from reddit_api.imports import import_reddits
-
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 r = praw.Reddit(user_agent=settings.REDDIT_API_USER_AGENT)
 
 
@@ -57,6 +58,19 @@ def check_submission_type(submission):
     return submission
 
 
+def update_image(reddit, reddit_image, submission):
+    if reddit_image.reputation < submission.ups:
+        val = URLValidator()
+        try:
+            val(submission.thumbnail)
+        except ValidationError:
+            return
+        reddit_image.url = submission.thumbnail
+        reddit_image.post = submission.permalink
+        reddit_image.reddit = reddit
+        reddit_image.reputation = submission.ups
+
+
 def get_submissions(request, reddit_name):
     reddit = Reddit.objects.get(url="/r/{}/".format(reddit_name))
     reddit_image = reddit.image
@@ -75,11 +89,7 @@ def get_submissions(request, reddit_name):
     for submission in api_submissions:
         entry_list.append(check_submission_type(submission))
         last_post = submission
-        if reddit_image.reputation < submission.ups:
-            reddit_image.url = submission.thumbnail
-            reddit_image.post = submission.permalink
-            reddit_image.reddit = reddit
-            reddit_image.reputation = submission.ups
+        update_image(reddit, reddit_image, submission)
 
     last_post_id = "t3_{}".format(last_post.id) if last_post else None
     batch_id = batch_id or "t3_{}".format(entry_list[0].id)

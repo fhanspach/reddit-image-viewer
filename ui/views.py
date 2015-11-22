@@ -18,7 +18,7 @@ def all_reddits_list_dummy(request):
 def list_dummy(request):
     popular_reddits = Reddit.objects.order_by('-subscribers')
     context = {
-        'popular_reddits': popular_reddits[0:10]
+        'popular_reddits': popular_reddits[0:50]
     }
     return render(request, 'ui/list.html', context=context)
 

@@ -143,7 +143,7 @@
     </div>
 
 </div>
-
+{% block page_scripts %}
 <script type="text/javascript">
     var last_post_id = null;
     var is_loading = false;
@@ -254,14 +254,15 @@
             onDoneLoad();
             $loading_indicator.fadeOut(600);
         }
+
         function onDoneLoad() {
             var container = document.querySelector('#submission_content');
             //$container.show();
+            console.log("positioning...")
             var msnry = new Masonry(container, {
                 // options
                 itemSelector: '.submission'
             });
-
         }
 
         $(window).scroll(function (data) {
@@ -279,5 +280,6 @@
         });
     })
 </script>
+{% endblock %}
 </body>
 </html>

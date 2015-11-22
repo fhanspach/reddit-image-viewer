@@ -1,7 +1,8 @@
 <a class="dummy_thumbnail image-thumb-loaded " href="{{ submission.permalink }}"
    id="submission-link{{ submission.id }}">{% spaceless %}
     <img class="img-responsive image-thumb" id="image-thumb-{{ submission.id }}"
-         src="{% if submission.thumbnail != "nsfw" %}{{ submission.thumbnail }}{% else %}http://thmbnlr.apps.its-hub.de/?url={{ submission.media.oembed.thumbnail_url|default:"http://placehold.it/350x150?text=No Preview :(" }}&width=100&max_size=100{% endif %}"
+         src="
+                 {% if submission.thumbnail != "nsfw" %}{{ submission.thumbnail }}{% else %}http://thmbnlr.apps.its-hub.de/?url={{ submission.media.oembed.thumbnail_url|default:"http://placehold.it/350x150?text=No Preview :(" }}&width=100&max_size=100{% endif %}"
          alt="" style="width: 100%"/>
     <img class="img-responsive image-full" id="image-full-{{ submission.id }}"
          src="http://thmbnlr.apps.its-hub.de/?url={{ submission.url }}&width=600&max_size=100" alt=""
@@ -25,6 +26,14 @@
         $submission_link.addClass("image-full-loaded");
         var thumb_selector = "image-thumb-{{ submission.id }}";
         $(thumb_selector).remove();
+
+        // Reposition image after the full image is loaded
+        var container = document.querySelector('#submission_content');
+        var msnry = new Masonry(container, {
+            // options
+            itemSelector: '.submission'
+        });
+
     });
     $(image_full_selector).error(function (error_data) {
         console.log(image_full_selector + " broken");
