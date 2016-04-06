@@ -57,3 +57,34 @@
     padding: 10px;
     font-size: 3rem;
 }
+
+.reddit-tile-background {
+    position: absolute;
+    overflow: hidden;
+    top: -0.5vw;
+    left: -5px;
+    bottom: -5px;
+    right: -20px;
+
+    filter: blur(4px) opacity(0.5);
+    -webkit-filter: blur(4px) opacity(0.5);
+    -moz-filter: blur(4px) opacity(0.5);
+    -o-filter: blur(4px) opacity(0.5);
+}
+
+.reddit-tile-footer {
+    position: absolute;
+    bottom: 35px;
+    right: 0;
+}
+
+.reddit-tile-link {
+    height: 170px;
+    padding-left: 0 !important;
+    overflow: hidden;
+    background-color: #121212 !important;
+}
+
+.no-border {
+    border:none !important;
+}
