@@ -15,10 +15,10 @@ class Reddit(models.Model):
     image = models.ForeignKey("RedditImage", null=True, blank=True, related_name="shown_image")
 
     def get_html_link(self):
-        return mark_safe("<a href={}>{}</a>".format("https://reddit.com" + self.url, self.url))
+        return mark_safe("<a href={0}>{1}</a>".format("https://reddit.com" + self.url, self.url))
 
     def display_image_url(self):
-        return mark_safe("<img src='{}' height=70 />".format(self.get_image_url()))
+        return mark_safe("<img src='{0}' height=70 />".format(self.get_image_url()))
 
     def get_image_url(self):
         return self.image.url if self.image is not None and self.image.url is not "self" and self.image.url is not "" else "http://placehold.it/400x300"
@@ -31,4 +31,4 @@ class RedditImage(models.Model):
     reddit = models.ForeignKey("Reddit", related_name="all_images", null=True)
 
     def __unicode__(self):
-        return mark_safe(u"<img src='{}' height=30 /> ({})".format(self.url, self.reputation))
+        return mark_safe(u"<img src='{0}' height=30 /> ({1})".format(self.url, self.reputation))
