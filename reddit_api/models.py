@@ -12,7 +12,7 @@ class Reddit(models.Model):
     date_created = models.DateTimeField()
     url = models.CharField(max_length=1023, primary_key=True)
     subscribers = models.DecimalField(max_digits=10, decimal_places=0)
-    banner_image = models.URLField(null=True, blank=True)
+    banner_image = models.URLField(blank=True)
     image = models.ForeignKey("RedditImage", null=True, blank=True, related_name="shown_image")
 
     def get_html_link(self):
@@ -31,7 +31,7 @@ class Reddit(models.Model):
 class RedditImage(models.Model):
     url = models.URLField()
     reputation = models.IntegerField()
-    post = models.URLField(blank=True, null=True)
+    post = models.URLField(blank=True)
     reddit = models.ForeignKey("Reddit", related_name="all_images", null=True)
 
     def __unicode__(self):
