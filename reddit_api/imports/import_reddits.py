@@ -30,7 +30,7 @@ class RedditImporter(object):
                 "banner_image": reddit_dict['banner_img']}
         )
         reddit.save()
-        log_string = "{} {}{}\033[0m({})".format('n' if created else 'u',
+        log_string = "{0} {1}{2}\033[0m({3})".format('n' if created else 'u',
                                                  REDDIT_COLOR_RED if reddit.over18 else REDDIT_COLOR, reddit.url,
                                                  reddit.subscribers)
         print(log_string)
@@ -64,7 +64,7 @@ class RedditImporter(object):
 
     def import_all_reddits(self):
         url = settings.ALL_REDDITS_URL.format(settings.IMPORT_BATCH_SIZE,
-                                              "&after={}".format(self.after) if self.after else "")
+                                              "&after={0}".format(self.after) if self.after else "")
         response_json = self._send_request(url)
 
         for reddit_data in response_json['data']['children']:
