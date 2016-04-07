@@ -32,7 +32,7 @@ def import_reddits(request):
 
 
 def view_reddit(request, url_fragment):
-    url = "/r/{}/".format(url_fragment)
+    url = "/r/{0}/".format(url_fragment)
     try:
         reddit = Reddit.objects.get(url=url)
     except Reddit.DoesNotExist:
@@ -40,15 +40,15 @@ def view_reddit(request, url_fragment):
             reddit = reddit_importer.RedditImporter().import_single_reddit(url)
         except Http404:
             return render(request, "ui/index.html", context={"error_title": "Not Found",
-                                                             "error_msg": "The reddit {} was not found :(".format(
+                                                             "error_msg": "The reddit {0} was not found :(".format(
                                                                  url_fragment)})
         except KeyError:
             return render(request, "ui/index.html", context={"error_title": "Error",
-                                                             "error_msg": "There was an error while accessing {} :(".format(
+                                                             "error_msg": "There was an error while accessing {0} :(".format(
                                                                  url_fragment)})
         except HTTPError:
             return render(request, "ui/index.html", context={"error_title": "Error",
-                                                             "error_msg": "There was an error while accessing {} :(".format(
+                                                             "error_msg": "There was an error while accessing {0} :(".format(
                                                                  url_fragment)})
     context = {
         'reddit': reddit,
