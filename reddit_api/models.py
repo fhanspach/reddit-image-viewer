@@ -22,9 +22,10 @@ class Reddit(models.Model):
         return mark_safe("<img src='{}' height=70 />".format(self.get_image_url()))
 
     def get_image_url(self):
-        return self.image.url if self.image is not None and self.image.url is not "self" and self.image.url is not "" else "http://placehold.it/400x300"
+        return self.image.url if self.image is not None and self.image.url is not "self" and self.image.url is not "" \
+            else "http://placehold.it/400x300?text={}".format(self.display_name)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.display_name
 
 
@@ -34,7 +35,7 @@ class RedditImage(models.Model):
     post = models.URLField(blank=True)
     reddit = models.ForeignKey("Reddit", related_name="all_images", null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return mark_safe(u"<img src='{}' height=30 /> ({})".format(self.url, self.reputation))
 
 
@@ -43,5 +44,5 @@ class FollowedReddit(models.Model):
     reddit = models.ForeignKey(Reddit)
     counter = models.BigIntegerField(default=0)
 
-    def __unicode__(self):
+    def __str__(self):
         return "{} ({})".format(self.reddit.display_name, self.user)
