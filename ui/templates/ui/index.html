@@ -9,20 +9,25 @@
     <link href='http://fonts.googleapis.com/css?family=Raleway:100,400,200' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600|Indie+Flower' rel='stylesheet'
           type='text/css'>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
     <link rel="stylesheet" href="{% static 'ui/css/style.css' %}" type="text/css"/>
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" type="text/css" href="{% static "ui/css/bootstrap.metro.min.css" %}"/>
-    <script src="{% static "ui/js/bootstrap.min.js" %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/3.1.8/imagesloaded.pkgd.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/masonry/3.1.5/masonry.pkgd.min.js"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css" href="{% static "ui/css/bootstrap.metro.min.css" %}"/>
+    <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/css/bootstrap-notify.min.css"/>
+    <script src="{% static "ui/js/bootstrap.min.js" %}"></script>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -86,6 +91,36 @@
             {% endif %}
 
             <p class="text-primary">
+                {% if request.user.is_authenticated %}
+                    <a href="#" id="follow_button"
+                       class="follow-buttons {% if followed %}state-followed{% else %}state-not-followed{% endif %}">
+                        <span class="follow btn btn-primary btn-xs"><span class="fa fa-check">&nbsp;</span>Follow</span>
+                        <span class="followed btn btn-success btn-xs"><span
+                                class="fa fa-check">&nbsp;</span>Followed</span>
+                        <span class="unfollow btn btn-danger btn-xs"><span
+                                class="fa fa-times">&nbsp;</span>Unfollow</span>
+                    </a>
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            var $element = $("#follow_button");
+                            $element.on("click", function () {
+                                if ($element.hasClass("state-followed")) {
+                                    $element.removeClass("state-followed");
+                                    $element.addClass("state-not-followed");
+                                    $.get("/reddit/{{ reddit.display_name }}/unfollow/");
+                                    return;
+                                }
+
+                                if ($element.hasClass("state-not-followed")) {
+                                    $element.removeClass("state-not-followed");
+                                    $element.addClass("state-followed");
+                                    $.get("/reddit/{{ reddit.display_name }}/follow/");
+                                    return;
+                                }
+                            })
+                        })
+                    </script>
+                {% endif %}
                 <span><span class="fa fa-users"></span>&nbsp;{{ reddit.subscribers|intcomma }}</span>&nbsp;
                 <span><span class="fa fa-calendar-times-o"></span>&nbsp;{{ reddit.date_created|timesince }}</span>&nbsp;
             </p>
@@ -96,7 +131,8 @@
 <div class="container-fluid">
     <div class="row" id="load_prev" style="display: none; padding: 1rem;">
         <div class="col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-12 col-xs-12">
-            <a href="#" class="btn btn-primary btn-lg center-block" id="load_next_button"><span class="fa fa-arrow-up">&nbsp;</span>Load previous...</a>
+            <a href="#" class="btn btn-primary btn-lg center-block" id="load_next_button"><span class="fa fa-arrow-up">&nbsp;</span>Load
+                previous...</a>
         </div>
     </div>
     {% block content %}
@@ -144,142 +180,144 @@
 
 </div>
 {% block page_scripts %}
-<script type="text/javascript">
-    var last_post_id = null;
-    var is_loading = false;
-    var loading_images = 0;
-    var submissions_queue = [];
+    <script type="text/javascript">
+        var last_post_id = null;
+        var is_loading = false;
+        var loading_images = 0;
+        var submissions_queue = [];
 
-    $(document).ready(function () {
-        var error_handler = function (data) {
-            is_loading = false;
-            $loading_indicator.hide();
-            $("#error-heading").html("<i class='fa fa-exclamation-triangle'></i> HTTP Status Code " + data.status + ": " + data.statusText);
-            $("#error-body").html("The request to the server failed. <br/> <a href='#exception-text' data-toggle='collapse'>more...</a><div id='exception-text' class='collapse'><pre class='pre-scrollable'>" + data.responseText + "</pre></div>");
-            $(".error-row").show();
-            console.error(data.responseText)
-        };
+        $(document).ready(function () {
+            var error_handler = function (data) {
+                is_loading = false;
+                $loading_indicator.hide();
+                $("#error-heading").html("<i class='fa fa-exclamation-triangle'></i> HTTP Status Code " + data.status + ": " + data.statusText);
+                $("#error-body").html("The request to the server failed. <br/> <a href='#exception-text' data-toggle='collapse'>more...</a><div id='exception-text' class='collapse'><pre class='pre-scrollable'>" + data.responseText + "</pre></div>");
+                $(".error-row").show();
+                console.error(data.responseText)
+            };
 
-        var container = document.querySelector('#submission_content');
-
-        var $loading_indicator = $("#loading-indicator");
-        var msnry = new Masonry(container, {
-            // options
-            itemSelector: '.submission'
-        });
-
-        function get_current_parameters() {
-            // FIXME replace this method with a state that works without reloading the page
-            var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"{% endspaceless %}
-            if (last_post_id != null) {
-                parameter_string += "&last=" + last_post_id;
-            }
-            return parameter_string
-        }
-
-        function load_submissions_from_api() {
-            $loading_indicator.fadeIn();
-            var url = "/reddit/{{ reddit.display_name }}?";
-            url = url + get_current_parameters();
-            if (loading_images > 100) {
-                console.warn("Too many requests... Waiting now");
-                while (loading_images > 100) {
-                    console.log(loading_images)
-                }
-            }
-            is_loading = true;
-            $.ajax(url, {
-                success: function (data) {
-                    var $submissionContent = $('#submission_content');
-                    last_post_id = data.last_post;
-                    var batch_id = data.batch_id;
-                    console.log("batch: " + batch_id)
-                    $submissionContent.append(data.html);
-                    msnry.layout();
-                    is_loading = false;
-                    submissions_queue.push(last_post_id);
-                    if (submissions_queue.length > 4) {
-                        window.location.hash = submissions_queue.shift();
-                    }
-
-
-                    var submission_thumbs = $(".image-thumb");
-                    console.log("loading: " + last_post_id);
-                    submission_thumbs.imagesLoaded(function () {
-                    }).always(function(){onAlwaysListener(batch_id)});
-                },
-                error: error_handler
-            });
-        }
-
-        function do_first_load() {
-            if (window.location.hash != "") {
-                $("#load_prev").show();
-                last_post_id = window.location.hash.substring(1);
-                console.log("continue from " + last_post_id);
-            }
-
-            load_submissions_from_api();
-        }
-
-        if ($('#submission_content').is(':empty')) {
-            do_first_load();
-        }
-
-        $("#load_next_button").on('click', function (e) {
-            e.preventDefault();
-            load_submissions_from_api();
-        });
-
-        var $search_field = $("#reddit_search_field");
-        $search_field.on('keypress', function (e) {
-            if (e.which == 13) {
-                var url_fragment = $search_field.val().replace(/\s+/g, '');
-                var url = "";
-                if ((/^\/r\//).test(url_fragment)) {
-                    url = url_fragment
-                } else {
-                    url = "/r/" + url_fragment + "/";
-                }
-
-                window.location.href = url;
-            }
-        });
-
-        function onAlwaysListener(batch_id) {
-            console.log("batch: " + batch_id);
-            var selector = "#submission-batch-" + batch_id;
-            console.log(selector);
-            $(selector).show();
-            onDoneLoad();
-            $loading_indicator.fadeOut(600);
-        }
-
-        function onDoneLoad() {
             var container = document.querySelector('#submission_content');
-            //$container.show();
-            console.log("positioning...")
+
+            var $loading_indicator = $("#loading-indicator");
             var msnry = new Masonry(container, {
                 // options
                 itemSelector: '.submission'
             });
-        }
 
-        $(window).scroll(function (data) {
-            if (is_loading) {
-                return;
+            function get_current_parameters() {
+                // FIXME replace this method with a state that works without reloading the page
+                var parameter_string = {% spaceless %}"display={{ request.GET.display }}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}"{% endspaceless %}
+                if (last_post_id != null) {
+                    parameter_string += "&last=" + last_post_id;
+                }
+                return parameter_string
             }
 
-            var scroll_height = $(window).scrollTop() + $(window).height();
-            var doc_height = $(document).height();
-            var left = doc_height - scroll_height;
-            var loading_scroll_time = $(window).height() * 3;
-            if (left < loading_scroll_time) {
+            function load_submissions_from_api() {
+                $loading_indicator.fadeIn();
+                var url = "/reddit/{{ reddit.display_name }}?";
+                url = url + get_current_parameters();
+                if (loading_images > 100) {
+                    console.warn("Too many requests... Waiting now");
+                    while (loading_images > 100) {
+                        console.log(loading_images)
+                    }
+                }
+                is_loading = true;
+                $.ajax(url, {
+                    success: function (data) {
+                        var $submissionContent = $('#submission_content');
+                        last_post_id = data.last_post;
+                        var batch_id = data.batch_id;
+                        console.log("batch: " + batch_id)
+                        $submissionContent.append(data.html);
+                        msnry.layout();
+                        is_loading = false;
+                        submissions_queue.push(last_post_id);
+                        if (submissions_queue.length > 4) {
+                            window.location.hash = submissions_queue.shift();
+                        }
+
+
+                        var submission_thumbs = $(".image-thumb");
+                        console.log("loading: " + last_post_id);
+                        submission_thumbs.imagesLoaded(function () {
+                        }).always(function () {
+                            onAlwaysListener(batch_id)
+                        });
+                    },
+                    error: error_handler
+                });
+            }
+
+            function do_first_load() {
+                if (window.location.hash != "") {
+                    $("#load_prev").show();
+                    last_post_id = window.location.hash.substring(1);
+                    console.log("continue from " + last_post_id);
+                }
+
                 load_submissions_from_api();
             }
-        });
-    })
-</script>
+
+            if ($('#submission_content').is(':empty')) {
+                do_first_load();
+            }
+
+            $("#load_next_button").on('click', function (e) {
+                e.preventDefault();
+                load_submissions_from_api();
+            });
+
+            var $search_field = $("#reddit_search_field");
+            $search_field.on('keypress', function (e) {
+                if (e.which == 13) {
+                    var url_fragment = $search_field.val().replace(/\s+/g, '');
+                    var url = "";
+                    if ((/^\/r\//).test(url_fragment)) {
+                        url = url_fragment
+                    } else {
+                        url = "/r/" + url_fragment + "/";
+                    }
+
+                    window.location.href = url;
+                }
+            });
+
+            function onAlwaysListener(batch_id) {
+                console.log("batch: " + batch_id);
+                var selector = "#submission-batch-" + batch_id;
+                console.log(selector);
+                $(selector).show();
+                onDoneLoad();
+                $loading_indicator.fadeOut(600);
+            }
+
+            function onDoneLoad() {
+                var container = document.querySelector('#submission_content');
+                //$container.show();
+                console.log("positioning...")
+                var msnry = new Masonry(container, {
+                    // options
+                    itemSelector: '.submission'
+                });
+            }
+
+            $(window).scroll(function (data) {
+                if (is_loading) {
+                    return;
+                }
+
+                var scroll_height = $(window).scrollTop() + $(window).height();
+                var doc_height = $(document).height();
+                var left = doc_height - scroll_height;
+                var loading_scroll_time = $(window).height() * 3;
+                if (left < loading_scroll_time) {
+                    load_submissions_from_api();
+                }
+            });
+        })
+    </script>
 {% endblock %}
 </body>
 </html>

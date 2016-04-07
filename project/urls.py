@@ -20,6 +20,8 @@ from reddit_api import urls as reddit_api_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+
     url(r'^', include(image_viewer_urls)),
     url(r'^reddit/', include(reddit_api_urls)),
+
 ]

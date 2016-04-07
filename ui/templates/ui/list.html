@@ -1,39 +1,20 @@
 {% extends 'ui/index.html' %}
-{% load humanize %}
 
 {% block content %}
     <div class="container-fluid">
+        {% if user.is_authenticated %}
+            <div class="row">
+            <h2 class="text-center">My Reddits</h2>
+                {% for reddit in my_reddits %}
+                    {% include "ui/reddit_tile.html" %}
+                {% endfor %}
+            </div>
+            <hr/>
+        {% endif %}
         <div class="row">
+            <h2 class="text-center">Top Reddits</h2>
             {% for reddit in popular_reddits %}
-                <div class="col-lg-4 col-sm-6 col-xs-12">
-                    <a href="{{ reddit.url }}"
-                       class="col-lg-12 col-sm-12 col-xs-12 panel panel-default reddit-tile-link">
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
-                             style="height:200px; color:white;">
-                            <div class="reddit-tile-background"
-                                 style="background: url('{{ reddit.get_image_url }}') center center no-repeat;background-size: cover;"></div>
-                            <div>
-                                <h2 style="color:whitesmoke; position:relative;">{{ reddit.display_name }}</h2>
-                            </div>
-                            <div class="reddit-tile-footer">
-                                <p class="text-primary" style="color:whitesmoke">
-                                    {% if reddit.over18 %}
-                                        <span data-toggle="tooltip" style="margin-right: 10px"
-                                              data-placement="right" title="" data-original-title="Over 18"
-                                              class="submission_badge">
-                                                <span class="label label-danger">NSFW</span>
-                                        </span>
-                                    {% endif %}
-                                    <span><span
-                                            class="fa fa-users"></span>&nbsp;{{ reddit.subscribers|intcomma }}</span>&nbsp;
-                                        <span><span
-                                                class="fa fa-calendar-times-o"></span>&nbsp;{{ reddit.date_created|timesince }}</span>&nbsp;
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
+                {% include "ui/reddit_tile.html" %}
             {% endfor %}
         </div>
     </div>

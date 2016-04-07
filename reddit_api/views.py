@@ -1,15 +1,16 @@
 import re
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse
 from django.conf import settings
 from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.template.loader import render_to_string
 import praw
-from reddit_api.models import Reddit, RedditImage
+from reddit_api.models import Reddit, RedditImage, FollowedReddit
 from requests import ConnectionError
 from reddit_api.imports import import_reddits
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+
 r = praw.Reddit(user_agent=settings.REDDIT_API_USER_AGENT)
 
 
@@ -123,3 +124,28 @@ def get_recommended(request, reddit_name):
     return render(request, 'reddit_api/recommended.html', context={
         "reddits": result
     })
+
+
+def follow(request, reddit_name):
+    reddit_url = "/r/{}/".format(reddit_name)
+    try:
+        reddit = Reddit.objects.get(url=reddit_url)
+    except Reddit.DoesNotExist:
+        reddit = import_reddits.RedditImporter().import_single_reddit(reddit_url)
+
+    followed = FollowedReddit()
+    followed.reddit = reddit
+    followed.user = request.user
+    followed.save()
+    return JsonResponse({'status': 'ok'})
+
+
+def unfollow(request, reddit_name):
+    reddit_url = "/r/{}/".format(reddit_name)
+    try:
+        reddit = Reddit.objects.get(url=reddit_url)
+    except Reddit.DoesNotExist:
+        reddit = import_reddits.RedditImporter().import_single_reddit(reddit_url)
+    followed = FollowedReddit.objects.get(reddit=reddit, user=request.user)
+    followed.delete()
+    return JsonResponse({'status': 'ok'})

@@ -86,5 +86,37 @@
 }
 
 .no-border {
-    border:none !important;
+    border: none !important;
+}
+
+.follow-buttons {
+    width: 90px;
+    display: inline-block;
+    margin-right: 10px;
+}
+.unfollow, .follow, .followed {
+    width: 100%;
+}
+
+/* State: Followed */
+.follow-buttons.state-followed:hover > .unfollow {
+    display: inline-block;
+}
+
+.follow-buttons.state-followed:hover > .followed, .follow-buttons.state-followed:hover > .follow {
+    display: none;
+}
+
+.follow-buttons.state-followed > .follow, .follow-buttons.state-followed > .unfollow {
+    display: none;
+    text-decoration: none;
+}
+
+/* State: Not Followed */
+.follow-buttons.state-not-followed > .follow {
+    display: inline-block;
+}
+
+.follow-buttons.state-not-followed > .followed, .follow-buttons.state-not-followed > .unfollow {
+    display: none;
 }

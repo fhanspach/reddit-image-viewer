@@ -1,7 +1,7 @@
 from django.contrib import admin
 from reddit_api import models
 # Register your models here.
-from reddit_api.models import RedditImage
+from reddit_api.models import RedditImage, FollowedReddit
 
 
 class RedditAdmin(admin.ModelAdmin):
@@ -13,3 +13,4 @@ class RedditAdmin(admin.ModelAdmin):
 
 admin.site.register(models.Reddit, RedditAdmin)
 admin.site.register(RedditImage)
+admin.site.register(FollowedReddit)
