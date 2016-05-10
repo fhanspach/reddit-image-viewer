@@ -73,7 +73,7 @@ def update_image(reddit, reddit_image, submission):
 
 
 def get_submissions(request, reddit_name):
-    reddit = Reddit.objects.get(url="/r/{}/".format(reddit_name))
+    reddit = Reddit.objects.get(url="/r/{0}/".format(reddit_name))
     reddit_image = reddit.image
     if reddit_image is None:
         reddit_image = RedditImage(url="http://placehold.it/400x300", reputation=0)
@@ -92,8 +92,8 @@ def get_submissions(request, reddit_name):
         last_post = submission
         update_image(reddit, reddit_image, submission)
 
-    last_post_id = "t3_{}".format(last_post.id) if last_post else None
-    batch_id = batch_id or "t3_{}".format(entry_list[0].id)
+    last_post_id = "t3_{0}".format(last_post.id) if last_post else None
+    batch_id = batch_id or "t3_{0}".format(entry_list[0].id)
     context = {
         'submissions': entry_list,
         'reddit': reddit,
@@ -114,7 +114,7 @@ def get_submissions(request, reddit_name):
 def get_image(request):
     if "url" not in request.GET:
         raise Http404
-    return redirect(to="http://thmbnlr.apps.its-hub.de/?url={}&width=600&max_size=100".format(request.GET.get("url")))
+    return redirect(to="http://thmbnlr.apps.its-hub.de/?url={0}&width=600&max_size=100".format(request.GET.get("url")))
 
 
 def get_recommended(request, reddit_name):
