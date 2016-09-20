@@ -20,4 +20,4 @@ update-checker==0.11
 arrow==0.5.4
 django-flat-theme
 django-toolbelt
-arrow
+
