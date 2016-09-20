@@ -16,8 +16,8 @@ requests==2.7.0
 six==1.9.0
 static3==0.6.0
 update-checker==0.11
-wsgiref==0.1.2
 -e git+https://github.com/fhanspach/dj-secret-key-util#egg=secret_key_util
 arrow==0.5.4
 django-flat-theme
 django-toolbelt
+arrow
