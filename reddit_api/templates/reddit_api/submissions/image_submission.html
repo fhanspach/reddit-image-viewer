@@ -1,4 +1,4 @@
-<a class="dummy_thumbnail image-thumb-loaded " href="{{ submission.permalink }}"
+<a class="dummy_thumbnail image-thumb-loaded " href="#{{ submission.permalink }}"
    id="submission-link{{ submission.id }}">{% spaceless %}
     <img class="img-responsive image-thumb" id="image-thumb-{{ submission.id }}"
          src="{% if submission.thumbnail != "nsfw" %}{{ submission.thumbnail }}{% else %}http://thmbnlr.apps.its-hub.de/?url={{ submission.media.oembed.thumbnail_url|default:"http://placehold.it/350x150?text=No Preview :(" }}&width=100&max_size=100{% endif %}"
@@ -11,8 +11,9 @@
     <div class="image-error-indicator text-danger"><span class="fa fa-exclamation-triangle"></span></div>
 {% endspaceless %}
 </a>
-<p>{{ submission.title }}
+<p><a href="{{ submission.permalink }}"><span class="fa fa-link" ></span></a>&nbsp;{{ submission.title }}
     <small><a href="#">{{ submission.author }}</a></small>
+
 </p>
 
 <script type="text/javascript">
@@ -42,7 +43,8 @@
             {
                 src: "{{ submission.url }}",
                 w: $this.width()*10,
-                h: $this.height()*10
+                h: $this.height()*10,
+                title: '{{ submission.title }} by {{ submission.author }}'
             }
         ];
 
@@ -62,7 +64,6 @@
         var $submission_link = $($submission_link_selector);
         $submission_link.removeClass("image-thumb-loaded");
         $submission_link.addClass("image-full-loaded-error");
-        // console.error(error_data);
         var full_img_selector = "image-full-{{ submission.id }}";
         $(full_img_selector).remove();
     });

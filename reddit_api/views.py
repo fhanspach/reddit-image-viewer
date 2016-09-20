@@ -55,6 +55,9 @@ def check_submission_type(submission):
         submission.is_image = True
 
     if "imgur" in url_part:
+        imgur_id = url_part.split("imgur.com/")[-1]
+        if "/" not in imgur_id:
+            submission.url += ".jpg"
         submission.is_image = True
     return submission
 
